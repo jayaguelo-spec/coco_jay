@@ -1,0 +1,7 @@
+# Local tooling — not part of the student project
+.qodo/
+.github/modernize/
+
+# Temporary local run logs (evidence is in screenshots/ and the report)
+run_log*.txt
+run_err*.txt
