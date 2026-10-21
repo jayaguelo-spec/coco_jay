@@ -230,22 +230,39 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                const Text(
-                  'Your tools',
-                  style: TextStyle(
-                    color: Color(0xFF17352E),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Three starting sections of the system.',
-                  style: TextStyle(
-                    color: Color(0xFF63716C),
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Your tools',
+                            style: TextStyle(
+                              color: Color(0xFF17352E),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Three starting sections of the system.',
+                            style: TextStyle(
+                              color: Color(0xFF63716C),
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppButton(
+                      text: 'File a Report',
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRoutes.reportForm),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 LayoutBuilder(

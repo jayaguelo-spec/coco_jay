@@ -145,7 +145,7 @@ class LandingScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     title,
-                    navLinks,
+                    Flexible(child: navLinks),
                   ],
                 );
               }

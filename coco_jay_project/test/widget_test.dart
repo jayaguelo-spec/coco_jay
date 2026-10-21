@@ -103,4 +103,119 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
   });
+
+  testWidgets('Report form validates input and renders async states', (
+    WidgetTester tester,
+  ) async {
+    // Tall viewport so the whole report form fits on screen and taps never
+    // land on clipped widgets.
+    tester.view.physicalSize = const Size(1000, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'View Dashboard'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'File a Report'),
+    );
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'File a Report'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    // Loading state of the My reports panel.
+    expect(find.text('Loading your reports...'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+
+    // Empty state: nothing filed yet, plus an action.
+    expect(find.text('No reports yet'), findsOneWidget);
+    expect(
+      find.widgetWithText(ElevatedButton, 'Start a report'),
+      findsOneWidget,
+    );
+
+    // Validation blocks an empty submit.
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'Submit report'),
+    );
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Submit report'));
+    await tester.pump();
+    expect(find.text('Please enter your full name.'), findsOneWidget);
+    expect(find.text('Please enter your email address.'), findsOneWidget);
+    expect(find.text('Please choose a report type.'), findsOneWidget);
+
+    // Fill the form and submit through the Appointment channel.
+    await tester.enterText(find.byType(TextFormField).at(0), 'Maria Santos');
+    await tester.enterText(
+      find.byType(TextFormField).at(1),
+      'maria@example.com',
+    );
+    await tester.enterText(
+      find.byType(TextFormField).at(2),
+      'Move my check-up',
+    );
+    await tester.enterText(
+      find.byType(TextFormField).at(3),
+      'I would like to move my next check-up to a later day this week.',
+    );
+    await tester.ensureVisible(find.text('Appointment'));
+    await tester.pump();
+    await tester.tap(find.text('Appointment'));
+
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'Submit report'),
+    );
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Submit report'));
+    await tester.pump();
+
+    // Loading state while submitting.
+    expect(find.text('Submitting your report...'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+
+    // Success state with a reference number, and the list leaves empty.
+    expect(find.text('Report received'), findsOneWidget);
+    expect(find.textContaining('RPT-000'), findsWidgets);
+
+    // The Other channel fails, showing the error state.
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'File another report'),
+    );
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'File another report'));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Other'));
+    await tester.pump();
+    await tester.tap(find.text('Other'));
+    await tester.enterText(
+      find.byType(TextFormField).at(2),
+      'Other concern',
+    );
+    await tester.enterText(
+      find.byType(TextFormField).at(3),
+      'Something that needs the Other channel which is under maintenance now.',
+    );
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'Submit report'),
+    );
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Submit report'));
+    await tester.pump();
+    expect(find.text('Submitting your report...'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+
+    expect(find.text('Could not submit your report'), findsOneWidget);
+    expect(find.textContaining('under maintenance'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Retry'), findsOneWidget);
+  });
 }
