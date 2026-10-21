@@ -6,7 +6,7 @@
 **System title:** Prenatal Care System (approved title shown in the UI)
 **Project name:** `coco_jay_project` (approved Dart project identifier for the group)
 **Group members:** 1. __________  2. __________  3. __________
-**Date completed:** __________
+**Date completed:** 2026-10-21
 
 ---
 
@@ -130,7 +130,7 @@ Home — a running skeleton, not the finished interface.
 | Dart + Flutter Web | Client-side UI, widgets, navigation, forms, client logic | **Initialized and run now** |
 | REST API (e.g., FastAPI) | Business rules, endpoints, validation, server-side processing | **Plan only** — `lib/services/api_client.dart` is a stub with `AppConstants.apiBaseUrl`; no API required or called |
 | PostgreSQL (IT 108) | Persistent storage, entities, relational constraints | **Plan/reference only** — no database connection exists |
-| Git + GitHub | Version control, collaboration, checkpoint history | Deferred by the group (see Checkpoint record) |
+| Git + GitHub | Version control, collaboration, checkpoint history | **Initialized and pushed now** — single repository at https://github.com/jayaguelo-spec/coco_jay, branch `main`, first commit `548e974` |
 | Chrome / local dev server | Run and inspect the Flutter Web app | **Demonstrated now** |
 
 Nothing backend-related is implemented yet, so no credentials or `.env` files
@@ -141,20 +141,34 @@ non-secret values.
 
 ## Checkpoint record
 
-> **Status: pending.** The group deferred Git/GitHub initialization for this
-> submission. To complete the checkpoint later, run at the project root and
-> push to the group repository:
+> **Status: completed.** One repository covers the whole group workspace: the
+> Flutter project (`coco_jay_project/`), this report, and the evidence
+> screenshots. An earlier nested repository inside `coco_jay_project/` was
+> removed so the group has a single Git history.
+
+Commands executed at the workspace root (`C:\Users\Jay\Downloads\Coco_Jay`):
 
 ```
 git init
 git add .
 git commit -m "Initial Flutter Web project"
 git branch -M main
-git remote add origin <REMOTE-URL>
-git push -u origin main
+git remote add origin https://github.com/jayaguelo-spec/coco_jay.git
+git push -u origin main --force
 ```
 
-Date completed: __________ | Commit hash: __________ | Repository URL: __________
+| Field | Value |
+|---|---|
+| Date completed | 2026-10-21 |
+| First commit | `548e974` — "Initial Flutter Web project" (142 files) |
+| Branch | `main` (set to track `origin/main`) |
+| Repository URL | https://github.com/jayaguelo-spec/coco_jay |
+| Remote verification | `git ls-remote --heads origin main` → `548e974fee6c11afcc4d140c44d8c6981b69cf73` |
+
+The `--force` flag was required because the repository already contained an
+older pre-activity commit from project setup; the checkpoint commit now replaces
+that history so the first visible commit is the Activity 8 baseline. No `.env`
+files, tokens, or database credentials exist in the repository.
 
 **Evidence:** Screenshot 3 (Git commands + successful push + commit visible on
 GitHub).

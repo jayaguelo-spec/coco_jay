@@ -42,4 +42,9 @@ flutter test
 ```
 
 ## First checkpoint
-Date: __________ | Commit: __________
+Date: 2026-10-21 | Commit: 548e974 ("Initial Flutter Web project") | Branch: main
+Repository: https://github.com/jayaguelo-spec/coco_jay
+The repository root contains this Flutter project (`coco_jay_project/`), the
+Activity 8 report (`ACTIVITY8_REPORT.md`), and the evidence `screenshots/`.
+Run the Flutter commands from inside `coco_jay_project/` (the folder that
+contains `pubspec.yaml`).
