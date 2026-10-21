@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../models/health_record.dart';
 import '../routes/app_routes.dart';
+import '../services/dashboard_service.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
+
+/// Async screen states for the dashboard records panel.
+enum _DashboardStatus { loading, success, empty, error }
 
 class _Feature {
   const _Feature(this.icon, this.title, this.subtitle, this.tint);
@@ -43,7 +48,62 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _nameController = TextEditingController();
+  final _dashboardService = const DashboardService();
+
   String? _savedName;
+
+  _DashboardStatus _status = _DashboardStatus.loading;
+  DashboardScenario _scenario = DashboardScenario.success;
+  List<HealthRecord> _records = const [];
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecords();
+  }
+
+  Future<void> _loadRecords() async {
+    setState(() {
+      _status = _DashboardStatus.loading;
+      _errorMessage = null;
+    });
+
+    try {
+      final records = await _dashboardService.fetchRecords(scenario: _scenario);
+      if (!mounted) return;
+      setState(() {
+        _records = records;
+        _status = records.isEmpty
+            ? _DashboardStatus.empty
+            : _DashboardStatus.success;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = error is DashboardException
+            ? error.message
+            : 'Something went wrong while loading your records.';
+        _status = _DashboardStatus.error;
+      });
+    }
+  }
+
+  void _previewScenario(DashboardScenario scenario) {
+    if (_status == _DashboardStatus.loading) return;
+    setState(() => _scenario = scenario);
+    _loadRecords();
+  }
+
+  void _scheduleAppointment() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Appointment scheduling arrives with the REST API in the next activity.',
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -216,7 +276,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _nameController,
                       onSave: _saveName,
                     );
-                    final activity = const _ActivityCard();
+                    final activity = _ActivityCard(
+                      status: _status,
+                      scenario: _scenario,
+                      records: _records,
+                      errorMessage: _errorMessage,
+                      onRetry: _loadRecords,
+                      onPreview: _previewScenario,
+                      onEmptyAction: _scheduleAppointment,
+                    );
 
                     if (wide) {
                       return Row(
@@ -370,10 +438,28 @@ class _PersonalizeCard extends StatelessWidget {
 }
 
 class _ActivityCard extends StatelessWidget {
-  const _ActivityCard();
+  const _ActivityCard({
+    required this.status,
+    required this.scenario,
+    required this.records,
+    required this.errorMessage,
+    required this.onRetry,
+    required this.onPreview,
+    required this.onEmptyAction,
+  });
+
+  final _DashboardStatus status;
+  final DashboardScenario scenario;
+  final List<HealthRecord> records;
+  final String? errorMessage;
+  final VoidCallback onRetry;
+  final ValueChanged<DashboardScenario> onPreview;
+  final VoidCallback onEmptyAction;
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = status == _DashboardStatus.loading;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -385,7 +471,7 @@ class _ActivityCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Recent activity',
+            'Your records',
             style: TextStyle(
               color: Color(0xFF17352E),
               fontSize: 18,
@@ -394,52 +480,304 @@ class _ActivityCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Everything you save will show up here.',
+            'Appointments and check-ups load here from the records service.',
             style: TextStyle(
               color: Color(0xFF63716C),
               fontSize: 14,
               height: 1.45,
             ),
           ),
-          const SizedBox(height: 22),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAF8),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: const Color(0xFFE1E8E2),
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  color: Color(0xFF94A29C),
-                  size: 26,
+          const SizedBox(height: 16),
+          _ScenarioPicker(
+            selected: scenario,
+            enabled: !isLoading,
+            onSelected: onPreview,
+          ),
+          const SizedBox(height: 16),
+          if (isLoading) const _LoadingState() else ...?_buildBody(),
+        ],
+      ),
+    );
+  }
+
+  List<Widget>? _buildBody() {
+    switch (status) {
+      case _DashboardStatus.loading:
+        return null;
+      case _DashboardStatus.success:
+        return [
+          for (final record in records) ...[
+            _RecordTile(record: record),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 4),
+          const Row(
+            children: [
+              Icon(Icons.lightbulb_outline, color: Color(0xFFA34F32), size: 16),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Next step: open Appointments to plan your next clinic visit.',
+                  style: TextStyle(
+                    color: Color(0xFF63716C),
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Nothing here yet',
+              ),
+            ],
+          ),
+        ];
+      case _DashboardStatus.empty:
+        return [
+          const Icon(Icons.inbox_outlined, color: Color(0xFF94A29C), size: 26),
+          const SizedBox(height: 10),
+          const Text(
+            'No records yet',
+            style: TextStyle(
+              color: Color(0xFF17352E),
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'This is not an error — your account simply has no records to show '
+            'yet. Your first check-up will appear here once it is logged.',
+            style: TextStyle(
+              color: Color(0xFF63716C),
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          AppButton(text: 'Schedule first appointment', onPressed: onEmptyAction),
+        ];
+      case _DashboardStatus.error:
+        return [
+          const Row(
+            children: [
+              Icon(Icons.error_outline, color: Color(0xFFA34F32), size: 22),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Could not load your records',
                   style: TextStyle(
                     color: Color(0xFF17352E),
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 4),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            errorMessage ?? 'Unexpected error.',
+            style: const TextStyle(
+              color: Color(0xFF63716C),
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          AppButton(text: 'Retry', onPressed: onRetry),
+        ];
+    }
+  }
+}
+
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const LinearProgressIndicator(
+          minHeight: 4,
+          color: Color(0xFF236B55),
+          backgroundColor: Color(0xFFE1E8E2),
+        ),
+        const SizedBox(height: 16),
+        const Row(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF236B55),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Loading your records...',
+                style: TextStyle(
+                  color: Color(0xFF17352E),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'Your dashboard stays usable while records are fetched.',
+          style: TextStyle(
+            color: Color(0xFF63716C),
+            fontSize: 13,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScenarioPicker extends StatelessWidget {
+  const _ScenarioPicker({
+    required this.selected,
+    required this.enabled,
+    required this.onSelected,
+  });
+
+  final DashboardScenario selected;
+  final bool enabled;
+  final ValueChanged<DashboardScenario> onSelected;
+
+  static const Map<DashboardScenario, String> _labels = {
+    DashboardScenario.success: 'Success',
+    DashboardScenario.empty: 'Empty',
+    DashboardScenario.error: 'Error',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Preview state (demo until the REST API is connected)',
+          style: TextStyle(
+            color: Color(0xFF94A29C),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final value in DashboardScenario.values)
+              _ScenarioChip(
+                label: _labels[value]!,
+                selected: selected == value,
+                onTap: enabled ? () => onSelected(value) : null,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ScenarioChip extends StatelessWidget {
+  const _ScenarioChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF236B55) : const Color(0xFFF1F5F1),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? const Color(0xFF236B55) : const Color(0xFFE1E8E2),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : const Color(0xFF63716C),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecordTile extends StatelessWidget {
+  const _RecordTile({required this.record});
+
+  final HealthRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAF8),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE1E8E2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.event_note_outlined,
+            color: Color(0xFF236B55),
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  'Saved notes and finished tasks will appear once the REST API is connected.',
-                  style: TextStyle(
+                  record.title,
+                  style: const TextStyle(
+                    color: Color(0xFF17352E),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  record.note,
+                  style: const TextStyle(
                     color: Color(0xFF63716C),
                     fontSize: 13,
-                    height: 1.45,
+                    height: 1.4,
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            record.date,
+            style: const TextStyle(
+              color: Color(0xFF94A29C),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
