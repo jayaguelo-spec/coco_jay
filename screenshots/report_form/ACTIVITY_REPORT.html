@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IT 110 Lab Activity — Report Form with Async UI States</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #17352E; line-height: 1.55; font-size: 12pt; }
+  h1 { font-size: 20pt; color: #236B55; margin-bottom: 4px; }
+  h2 { font-size: 14pt; color: #236B55; margin-top: 22px; border-bottom: 2px solid #DCEBE2; padding-bottom: 4px; }
+  .meta { color: #63716C; font-size: 10.5pt; margin-bottom: 16px; }
+  .meta strong { color: #17352E; }
+  .summary { background: #F3F6F2; border-left: 4px solid #236B55; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0 18px; }
+  .link { word-break: break-all; color: #236B55; }
+  .shot { margin: 18px 0 26px; page-break-inside: avoid; }
+  .shot .label { font-weight: 700; font-size: 12pt; color: #236B55; margin-bottom: 4px; }
+  .shot .desc { color: #444; font-size: 11pt; margin-bottom: 8px; }
+  .shot img { width: 100%; max-width: 640px; border: 1px solid #C9D4CC; border-radius: 6px; }
+  .footer { margin-top: 28px; color: #94A29C; font-size: 9.5pt; border-top: 1px solid #E1E8E2; padding-top: 8px; }
+  table.info { border-collapse: collapse; width: 100%; margin: 8px 0 16px; font-size: 11pt; }
+  table.info td { padding: 4px 10px 4px 0; vertical-align: top; }
+  table.info td:first-child { font-weight: 700; white-space: nowrap; color: #236B55; }
+</style>
+</head>
+<body>
+
+<h1>IT 110 Lab Activity — Report Form with Async UI States</h1>
+<div class="meta">Prenatal Care System (Flutter Web) · Semester Project · Submitted 21 October 2026</div>
+
+<h2>Activity summary</h2>
+<div class="summary">
+For this activity we extended our Prenatal Care System Flutter Web project with a new
+<strong>File a Report</strong> screen (<code>lib/screens/report_form_screen.dart</code>).
+The screen contains a validated report form (full name, email, title, concern details, and a
+report-type chip selector) backed by a simulated <code>ReportService</code>. Submitting the form
+shows the four asynchronous UI states required by the activity:
+<strong>Loading</strong> (“Submitting your report…”),
+<strong>Success</strong> (“Report received” with reference <em>RPT-0001</em>),
+<strong>Empty</strong> (“No reports yet” in the My-reports panel), and
+<strong>Error</strong> (“Could not submit your report” when the <em>Other</em> channel is
+under maintenance). The screen is registered on route <code>/report</code> and linked from a
+<strong>File a Report</strong> button on the dashboard. We verified the behaviour with
+<code>flutter analyze</code> (no issues) and <code>flutter test</code> (3/3 widget tests passing),
+then captured the six screenshots below from the running release build and pushed everything
+to GitHub.
+</div>
+
+<h2>GitHub repository</h2>
+<table class="info">
+  <tr><td>Repository</td><td class="link">https://github.com/jayaguelo-spec/coco_jay</td></tr>
+  <tr><td>Branch</td><td>main</td></tr>
+  <tr><td>Feature commit</td><td><code>c676f73</code> — Add report form screen with validation and async UI states</td></tr>
+  <tr><td>Screenshots commit</td><td><code>3dd2bd7</code> — Add report form activity screenshots (6 required states)</td></tr>
+  <tr><td>Project folder</td><td><code>coco_jay_project/</code></td></tr>
+</table>
+
+<h2>Screenshots</h2>
+
+<div class="shot">
+  <div class="label">Screenshot 1 — VS Code Explorer</div>
+  <div class="desc">Opened the project in Visual Studio Code and expanded the Explorer so the new
+  files under <code>lib/</code> (models, services, screens including
+  <code>report_form_screen.dart</code>, routes, widgets) are visible.</div>
+  <img src="screenshot1_explorer.png" alt="Screenshot 1">
+</div>
+
+<div class="shot">
+  <div class="label">Screenshot 2 — Source code and running app</div>
+  <div class="desc">Side-by-side view: the code of <code>report_form_screen.dart</code> in VS Code
+  on the left, and the same report screen running in the browser on the right.</div>
+  <img src="screenshot2_code_and_app.png" alt="Screenshot 2">
+</div>
+
+<div class="shot">
+  <div class="label">Screenshot 3 — Loading state</div>
+  <div class="desc">Filled in every field, chose <em>Appointment</em>, and clicked
+  <strong>Submit report</strong>; the form area switched to the loading panel
+  “Submitting your report…” with a progress bar and spinner while the request was in flight.</div>
+  <img src="screenshot3_loading.png" alt="Screenshot 3">
+</div>
+
+<div class="shot">
+  <div class="label">Screenshot 4 — Success state</div>
+  <div class="desc">After the simulated request finished, the success panel showed
+  “Report received” with reference <em>RPT-0001 · Appointment</em>, and the new report
+  appeared at the top of the “My reports” list.</div>
+  <img src="screenshot4_success.png" alt="Screenshot 4">
+</div>
+
+<div class="shot">
+  <div class="label">Screenshot 5 — Empty state</div>
+  <div class="desc">On first visit the “My reports” panel finished loading and showed the empty
+  state “No reports yet”, explaining that this is not an error and offering a
+  <strong>Start a report</strong> button.</div>
+  <img src="screenshot5_empty.png" alt="Screenshot 5">
+</div>
+
+<div class="shot">
+  <div class="label">Screenshot 6 — Error state</div>
+  <div class="desc">Submitted a second report with the <em>Other</em> category, which the service
+  rejects on purpose; the error panel appeared with the maintenance message and
+  <strong>Retry</strong> / <strong>Edit my report</strong> actions.</div>
+  <img src="screenshot6_error.png" alt="Screenshot 6">
+</div>
+
+<div class="footer">
+  IT 110 — Semester Project · Prenatal Care System · Flutter Web ·
+  Generated 21 October 2026
+</div>
+
+</body>
+</html>
