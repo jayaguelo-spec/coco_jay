@@ -177,7 +177,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             ),
             const SizedBox(width: 12),
             const Text(
-              'File a Report',
+              'Submit Report',
               style: TextStyle(
                 color: Color(0xFF17352E),
                 fontSize: 15,
@@ -187,84 +187,108 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ],
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+      body: _submitting
+          ? const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Color(0xFF236B55),
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7E8DF),
-                    borderRadius: BorderRadius.circular(8),
+                  SizedBox(height: 18),
+                  Text(
+                    'Submitting report...',
+                    style: TextStyle(
+                      color: Color(0xFF17352E),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
+                ],
+              ),
+            )
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.report_gmailerrorred_outlined,
-                        color: Color(0xFFA34F32),
-                        size: 17,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7E8DF),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.report_gmailerrorred_outlined,
+                              color: Color(0xFFA34F32),
+                              size: 17,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'REPORT A CONCERN',
+                              style: TextStyle(
+                                color: Color(0xFF87432C),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        'REPORT A CONCERN',
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Tell us what you need help with.',
                         style: TextStyle(
-                          color: Color(0xFF87432C),
-                          fontSize: 11,
+                          color: Color(0xFF17352E),
+                          fontSize: 30,
+                          height: 1.15,
                           fontWeight: FontWeight.w700,
                         ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Your report goes to your community health worker. '
+                        'All fields marked required must be completed.',
+                        style: TextStyle(
+                          color: Color(0xFF63716C),
+                          fontSize: 15,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 26),
+                      KeyedSubtree(
+                        key: _formSectionKey,
+                        child: _buildSubmitSection(),
+                      ),
+                      const SizedBox(height: 24),
+                      _ReportsCard(
+                        status: _reportsStatus,
+                        reports: _myReports,
+                        onStartAction: _focusForm,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Tell us what you need help with.',
-                  style: TextStyle(
-                    color: Color(0xFF17352E),
-                    fontSize: 30,
-                    height: 1.15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Your report goes to your community health worker. '
-                  'All fields marked required must be completed.',
-                  style: TextStyle(
-                    color: Color(0xFF63716C),
-                    fontSize: 15,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 26),
-                KeyedSubtree(
-                  key: _formSectionKey,
-                  child: _buildSubmitSection(),
-                ),
-                const SizedBox(height: 24),
-                _ReportsCard(
-                  status: _reportsStatus,
-                  reports: _myReports,
-                  onStartAction: _focusForm,
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
   Widget _buildSubmitSection() {
-    if (_submitting) return const _SubmittingPanel();
     if (_submitted != null) {
       return _SuccessPanel(entry: _submitted!, onFileAnother: _fileAnother);
     }
@@ -366,9 +390,7 @@ class _ReportForm extends StatelessWidget {
             TextFormField(
               controller: nameController,
               validator: validateName,
-              decoration: _fieldDecoration.copyWith(
-                labelText: 'Full name *',
-              ),
+              decoration: _fieldDecoration.copyWith(labelText: 'Full name *'),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -430,66 +452,6 @@ class _ReportForm extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SubmittingPanel extends StatelessWidget {
-  const _SubmittingPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE1E8E2)),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LinearProgressIndicator(
-            minHeight: 4,
-            color: Color(0xFF236B55),
-            backgroundColor: Color(0xFFE1E8E2),
-          ),
-          SizedBox(height: 16),
-          Row(
-            children: [
-              SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Color(0xFF236B55),
-                ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Submitting your report...',
-                  style: TextStyle(
-                    color: Color(0xFF17352E),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 6),
-          Text(
-            'Please wait — sending is in progress and duplicate submits are blocked.',
-            style: TextStyle(
-              color: Color(0xFF63716C),
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -596,11 +558,7 @@ class _ErrorPanel extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(
-                Icons.error_outline,
-                color: Color(0xFFA34F32),
-                size: 24,
-              ),
+              Icon(Icons.error_outline, color: Color(0xFFA34F32), size: 24),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -771,11 +729,7 @@ class _ReportsCard extends StatelessWidget {
         ];
       case _ReportsStatus.empty:
         return [
-          const Icon(
-            Icons.inbox_outlined,
-            color: Color(0xFF94A29C),
-            size: 26,
-          ),
+          const Icon(Icons.inbox_outlined, color: Color(0xFF94A29C), size: 26),
           const SizedBox(height: 10),
           const Text(
             'No reports yet',

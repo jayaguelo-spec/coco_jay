@@ -177,7 +177,7 @@ void main() {
     await tester.pump();
 
     // Loading state while submitting.
-    expect(find.text('Submitting your report...'), findsOneWidget);
+    expect(find.text('Submitting report...'), findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
@@ -210,7 +210,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.widgetWithText(ElevatedButton, 'Submit report'));
     await tester.pump();
-    expect(find.text('Submitting your report...'), findsOneWidget);
+    expect(find.text('Submitting report...'), findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
