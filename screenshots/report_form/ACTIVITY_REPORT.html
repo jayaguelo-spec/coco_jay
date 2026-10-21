@@ -30,11 +30,13 @@
 <h2>Activity summary</h2>
 <div class="summary">
 For this activity we extended our Prenatal Care System Flutter Web project with a new
-<strong>File a Report</strong> screen (<code>lib/screens/report_form_screen.dart</code>).
+<strong>Submit Report</strong> screen (<code>lib/screens/report_form_screen.dart</code>),
+opened from the <strong>File a Report</strong> button on the dashboard.
 The screen contains a validated report form (full name, email, title, concern details, and a
 report-type chip selector) backed by a simulated <code>ReportService</code>. Submitting the form
 shows the four asynchronous UI states required by the activity:
-<strong>Loading</strong> (“Submitting your report…”),
+<strong>Loading</strong> (full-page centered spinner with “Submitting report…”, matching the
+reference design),
 <strong>Success</strong> (“Report received” with reference <em>RPT-0001</em>),
 <strong>Empty</strong> (“No reports yet” in the My-reports panel), and
 <strong>Error</strong> (“Could not submit your report” when the <em>Other</em> channel is
@@ -51,6 +53,7 @@ to GitHub.
   <tr><td>Branch</td><td>main</td></tr>
   <tr><td>Feature commit</td><td><code>c676f73</code> — Add report form screen with validation and async UI states</td></tr>
   <tr><td>Screenshots commit</td><td><code>3dd2bd7</code> — Add report form activity screenshots (6 required states)</td></tr>
+  <tr><td>Redesign commit</td><td><code>3777756</code> — Redesign Submit Report loading state to match reference; recapture screenshots</td></tr>
   <tr><td>Project folder</td><td><code>coco_jay_project/</code></td></tr>
 </table>
 
@@ -74,8 +77,9 @@ to GitHub.
 <div class="shot">
   <div class="label">Screenshot 3 — Loading state</div>
   <div class="desc">Filled in every field, chose <em>Appointment</em>, and clicked
-  <strong>Submit report</strong>; the form area switched to the loading panel
-  “Submitting your report…” with a progress bar and spinner while the request was in flight.</div>
+  <strong>Submit report</strong>; the whole screen switched to the loading state — a centered
+  spinner with “Submitting report…” under the <strong>Submit Report</strong> app bar —
+  while the request was in flight.</div>
   <img src="screenshot3_loading.png" alt="Screenshot 3">
 </div>
 
